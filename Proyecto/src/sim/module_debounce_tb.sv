@@ -1,5 +1,4 @@
 `timescale 1 ns / 100 ps
-
 module debounce_tb()
 
 reg clk;
@@ -8,9 +7,9 @@ reg valido;
 reg [3:0] tecla;
 
 wire limpio;
-mire [3:0] seleccion;
+wire [3:0] seleccion;
 
-debounce (.N10) UUT(
+debounce (.N10) DUT(
     .clk(clk),
     .rst(rst),
     .valido(valido),
