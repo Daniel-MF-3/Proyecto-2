@@ -1,16 +1,16 @@
 `timescale 1 ns / 100 ps
 
-module debounce_tb()
+module debounce_tb;
 
-reg clk;
-reg rst;
-reg valido;
-reg [3:0] tecla;
+logic clk;
+logic rst;
+logic valido;
+logic [3:0] tecla;
 
 wire limpio;
-mire [3:0] seleccion;
+wire [3:0] seleccion;
 
-debounce (.N10) UUT(
+debounce #(.N(4)) UUT(
     .clk(clk),
     .rst(rst),
     .valido(valido),
@@ -23,7 +23,7 @@ initial begin
     clk = 0;
     rst = 1;
     valido = 0;
-    tecla 4'd0;
+    tecla = 4'd0;
 
     #100 rst = 0;
 
@@ -36,9 +36,9 @@ initial begin
    #200;
 
     
-    tecla = 4'd5;
+    tecla = 4'd5; //Se presiona la tecla 5
 
-  
+    //Simulación de rebote
     #50  valido = 1;
     #20  valido = 0;
     #20  valido = 1;
@@ -46,14 +46,14 @@ initial begin
     #20  valido = 1;
 
     
-    #5000 valido = 1;
+    #30000 valido = 1; //Mantiene la señal estable
 
     
     #2000 valido = 0;
 
     
     #2000;
-    tecla = 4'd7;
+    tecla = 4'd7; //Se presiona otra tecla (7) y el mismo proceso.
 
     // Simula un rebote
     #50  valido = 1;
@@ -61,7 +61,7 @@ initial begin
     #20  valido = 1;
 
     
-    #5000 valido = 1;
+    #30000 valido = 1;
 
     
     #2000 valido = 0;
@@ -75,15 +75,18 @@ initial begin
     #20 valido = 1;
     #20 valido = 0;
 
+    #200 valido = 1; 
+
+
    
 
-    #5000;
+    #30000;
 
     $finish;
 end 
 initial begin
         $dumpfile("top_tb.vcd");
-        $dumpvars(0,top_tb);
+        $dumpvars(0,debounce_tb);
     end
 
 
