@@ -6,7 +6,6 @@ FAMILY = GW1N-9C
 DEVICE = GW1NR-LV9QN88PC6/I5
 
 #Nombre del proyecto... Acá ponen el nombre que deseen.
-PROYECT = Proyecto_2
 PROYECT = ProyectoEPA
 
 #Fuentes de diseno
