@@ -10,6 +10,22 @@ El sistema permite ingresar un primer número de hasta tres dígitos, luego camb
 El proyecto se divide en módulos: scanner del teclado, limpieza o validación de tecla, FSM de control, captura de números, suma, conversión a dígitos decimales, multiplexado de displays, decodificador de 7 segmentos y módulo superior.
 
 ---
+## Diagrama de bloques del sistema (etapas tempranas previas a consulta a profesor)
+#### Scanner
+![Modulo scanner](image.png)
+
+#### Modulo debounce
+![Modulo debounce](image-1.png)
+
+#### Sumador
+![Sumador](image-2.png)
+
+#### Modulo 7segmentos
+
+
+## Diagrama de transiciones de estados de la FSM
+![Diagrama de transiciones](image-3.png)
+
 
 ## 2. Módulo `scanner`
 
@@ -1182,3 +1198,40 @@ Otro punto delicado fue la FSM. El sistema debe saber si el dígito ingresado pe
 La captura de tres dígitos también necesitó cuidado. El número no se puede guardar como teclas separadas sin procesar, sino que debe construirse con la operación `numero * 10 + digito`.
 
 En el módulo superior, el problema más común fue conectar señales equivocadas. Por ejemplo, usar la tecla cruda en lugar de la tecla validada puede hacer que el sistema detecte la tecla pero la almacene mal.
+
+## Consumo de recursos 
+
+### Estadísticas de síntesis del módulo `top`
+
+| Recurso | Cantidad |
+|---|---:|
+| Number of wires | 1168 |
+| Number of wire bits | 2278 |
+| Number of public wires | 1168 |
+| Number of public wire bits | 2278 |
+| Number of memories | 0 |
+| Number of memory bits | 0 |
+| Number of processes | 0 |
+| Number of cells | 1487 |
+
+### Desglose de celdas
+
+| Celda | Cantidad |
+|---|---:|
+| ALU | 151 |
+| DFFC | 44 |
+| DFFCE | 130 |
+| DFFP | 1 |
+| DFFPE | 1 |
+| GND | 1 |
+| IBUF | 6 |
+| LUT1 | 337 |
+| LUT2 | 162 |
+| LUT3 | 74 |
+| LUT4 | 240 |
+| MUX2_LUT5 | 199 |
+| MUX2_LUT6 | 78 |
+| MUX2_LUT7 | 33 |
+| MUX2_LUT8 | 11 |
+| OBUF | 18 |
+| VCC | 1 |
