@@ -1,7 +1,27 @@
 # Proyecto 2
 # Sistema de ingreso por teclado matricial hexadecimal
 
-## 1. Funcionamiento general del circuito
+## 1. Abreviaturas y definiciones
+- **FPGA**: Field Programmable Gate Arrays
+
+## 2. Referencias
+[0] David Harris y Sarah Harris. *Digital Design and Computer Architecture. RISC-V Edition.* Morgan Kaufmann, 2022. ISBN: 978-0-12-820064-3
+
+[1] Fairchild Semiconductor, “DM74LS163A Synchronous 4-Bit Binary Counters,” Datasheet, 2000.
+
+[2] Datasheet Hub, “74LS163 Fully Synchronous 4-Bit Counter,” 2023. [Online]. Available: https://www.datasheethub.com/74ls163-fully-synchronous-4-bit-counter/
+
+[3] ON Semiconductor, “74LS163 Binary Counter Datasheet,” Datasheet, 2004.
+
+[4] C. Garaipoom, “SR Latch Explained: Circuit Variants, Truth Table, and Operation,” ElecCircuit, Feb. 2026. [Online]. Available: https://www.eleccircuit.com/how-sr-latch-works/
+
+[5] “SR Latch Circuit,” ChipVerify. [Online]. Available: https://www.chipverify.com/digital-fundamentals/sr-latch-circuit
+
+[6] SR NAND latch,” Electronics-Course. [Online]. Available: https://electronics-course.com/sr-nand-latch
+
+
+
+## 3. Funcionamiento general del circuito
 
 El sistema diseñado corresponde a una calculadora básica de suma implementada en hardware digital. La entrada de datos se realiza mediante un teclado hexadecimal 4x4, el cual es escaneado por columnas para determinar la tecla presionada. Debido a que las señales del teclado pueden presentar rebotes mecánicos, se incluye una etapa de filtrado que genera un único pulso limpio por cada pulsación estable.
 
@@ -33,7 +53,7 @@ El sistema completo se organiza en varios módulos: escaneo del teclado, elimina
 
 ---
 
-# 1. Módulo principal: `top`
+### 1. Módulo principal: `top`
 
 ```systemverilog
 module top (
@@ -49,7 +69,7 @@ module top (
 );
 ```
 
-## Descripción
+#### Descripción
 
 Este módulo conecta todos los bloques del sistema. Recibe el reloj principal, el reset físico y las señales provenientes de las filas del teclado matricial. A partir de esas entradas controla las columnas del teclado, procesa la tecla presionada, almacena los números ingresados, calcula la suma y envía los valores correspondientes al display de siete segmentos.
 
@@ -61,7 +81,7 @@ assign rst_high = ~reset;
 
 De esta forma, los módulos internos trabajan con un reset activo en alto.
 
-## Entradas
+#### Entradas
 
 | Señal        | Descripción                                               |
 | ------------ | --------------------------------------------------------- |
@@ -69,7 +89,7 @@ De esta forma, los módulos internos trabajan con un reset activo en alto.
 | `reset`      | Reset físico activo en bajo.                              |
 | `filas[3:0]` | Entradas provenientes de las filas del teclado matricial. |
 
-## Salidas
+#### Salidas
 
 | Señal                  | Descripción                                                                       |
 | ---------------------- | --------------------------------------------------------------------------------- |
@@ -80,7 +100,7 @@ De esta forma, los módulos internos trabajan con un reset activo en alto.
 | `led_externo_pulso`    | LED de depuración asociado al pulso limpio del debounce.                          |
 | `led_externo_bit0`     | LED de depuración asociado al bit menos significativo de la tecla procesada.      |
 
-## Funcionamiento general
+#### Funcionamiento general
 
 El sistema primero escanea el teclado mediante el módulo `scanner`. Cuando se detecta una tecla, el valor pasa al módulo `debounce`, el cual genera un único pulso limpio por cada pulsación válida. Ese pulso se entrega a la FSM, la cual decide si la tecla corresponde a un dígito decimal o a la tecla `A`, usada como confirmación o enter.
 
@@ -103,7 +123,7 @@ Esto significa:
 
 ---
 
-# 2. Módulo `scanner`
+### 2. Módulo `scanner`
 
 ```systemverilog
 module scanner (
@@ -117,13 +137,13 @@ module scanner (
 );
 ```
 
-## Descripción
+#### Descripción
 
 Este módulo se encarga de leer el teclado matricial 4x4. Para hacerlo, activa una columna a la vez y observa el valor presente en las filas. Si alguna fila cambia de `1` a `0`, significa que una tecla fue presionada.
 
 El teclado trabaja con resistencias de pull-up, por lo que el estado normal de las filas es `1111`. Cuando una tecla se presiona, una fila queda conectada con una columna activa en bajo.
 
-## Entradas
+#### Entradas
 
 | Señal           | Descripción                                           |
 | --------------- | ----------------------------------------------------- |
@@ -132,7 +152,7 @@ El teclado trabaja con resistencias de pull-up, por lo que el estado normal de l
 | `stop_scanning` | Detiene el barrido mientras una tecla está detectada. |
 | `filas[3:0]`    | Entradas físicas del teclado.                         |
 
-## Salidas
+#### Salidas
 
 | Señal             | Descripción                               |
 | ----------------- | ----------------------------------------- |
@@ -140,7 +160,7 @@ El teclado trabaja con resistencias de pull-up, por lo que el estado normal de l
 | `tecla_detectada` | Indica que existe una tecla presionada.   |
 | `pos_tecla[3:0]`  | Código hexadecimal de la tecla detectada. |
 
-## Funcionamiento
+#### Funcionamiento
 
 El módulo genera un divisor de reloj con `div_clk`. Cada vez que el contador llega a `26999`, cambia la columna activa. Las columnas se activan en bajo:
 
@@ -183,7 +203,7 @@ Entra en el case para detectaar cual tecla fue prescionada apoyado en el rastreo
 ---
 
 
-# 3. Módulo `debounce`
+### 3. Módulo `debounce`
 
 ```systemverilog
 module debounce #(parameter N = 21) (
@@ -196,11 +216,11 @@ module debounce #(parameter N = 21) (
 );
 ```
 
-## Descripción
+#### Descripción
 
 Este módulo elimina los rebotes mecánicos del teclado. Una tecla física no cambia de estado de forma ideal, sino que puede generar varios cambios rápidos antes de estabilizarse. El módulo evita que esos rebotes sean interpretados como varias pulsaciones.
 
-## Entradas
+#### Entradas
 
 | Señal        | Descripción                              |
 | ------------ | ---------------------------------------- |
@@ -209,14 +229,14 @@ Este módulo elimina los rebotes mecánicos del teclado. Una tecla física no ca
 | `valido`     | Indica que el scanner detectó una tecla. |
 | `tecla[3:0]` | Valor de la tecla detectada.             |
 
-## Salidas
+#### Salidas
 
 | Señal            | Descripción                                              |
 | ---------------- | -------------------------------------------------------- |
 | `limpio`         | Pulso limpio de un solo ciclo cuando la tecla es válida. |
 | `seleccion[3:0]` | Tecla estable filtrada.                                  |
 
-## Funcionamiento
+#### Funcionamiento
 
 Primero se sincronizan las entradas `valido` y `tecla` para evitar problemas por señales asíncronas. Luego se agrupan ambas en una sola muestra:
 
@@ -239,7 +259,7 @@ El sistema no vuelve a generar otro pulso hasta que la tecla se libere de forma 
 
 ---
 
-# 4. Módulo `FSM_control`
+### 4. Módulo `FSM_control`
 
 ```systemverilog
 module FSM_control (
@@ -258,11 +278,11 @@ module FSM_control (
 );
 ```
 
-## Descripción
+#### Descripción
 
 Este módulo es el núcleo de control del sistema. Implementa una máquina de estados finitos que administra la entrada de dos números decimales de hasta tres dígitos. También calcula el valor binario de cada número y la suma de ambos.
 
-## Entradas
+#### Entradas
 
 | Señal            | Descripción                            |
 | ---------------- | -------------------------------------- |
@@ -271,7 +291,7 @@ Este módulo es el núcleo de control del sistema. Implementa una máquina de es
 | `pulse_tecla`    | Pulso limpio generado por el debounce. |
 | `pos_tecla[3:0]` | Código de la tecla presionada.         |
 
-## Salidas
+#### Salidas
 
 | Señal                  | Descripción                                  |
 | ---------------------- | -------------------------------------------- |
@@ -370,7 +390,7 @@ La estructura se repite a  lo largo de los demas estados solo cambiando detalles
 
 ---
 
-# 5. Módulo `bin_to_bcd`
+### 5. Módulo `bin_to_bcd`
 
 ```systemverilog
 module bin_to_bcd (
@@ -384,7 +404,7 @@ module bin_to_bcd (
 );
 ```
 
-## Descripción
+#### Descripción
 
 Este módulo convierte el resultado binario de la suma a formato BCD para poder mostrarlo en el display de siete segmentos.
 
@@ -396,7 +416,7 @@ Como cada número ingresado puede llegar hasta `999`, la suma máxima posible es
 
 Por eso la entrada esperada es de 11 bits, suficiente para representar valores entre `0` y `1998`.
 
-## Entradas
+#### Entradas
 
 | Señal           | Descripción                   |
 | --------------- | ----------------------------- |
@@ -404,7 +424,7 @@ Por eso la entrada esperada es de 11 bits, suficiente para representar valores e
 | `reset`         | Reset activo en alto.         |
 | `binario[10:0]` | Resultado binario de la suma. |
 
-## Salidas
+#### Salidas
 
 | Señal          | Descripción         |
 | -------------- | ------------------- |
@@ -413,7 +433,7 @@ Por eso la entrada esperada es de 11 bits, suficiente para representar valores e
 | `decena[3:0]`  | Dígito de decenas.  |
 | `unidad[3:0]`  | Dígito de unidades. |
 
-## Funcionamiento
+#### Funcionamiento
 
 El módulo usa una FSM interna para convertir el número mediante restas sucesivas.
 
@@ -438,7 +458,7 @@ Los estados principales son:
 
 ---
 
-# 6. Módulo `controlador_display_total`
+### 6. Módulo `controlador_display_total`
 
 ```systemverilog
 module controlador_display_total (
@@ -453,11 +473,11 @@ module controlador_display_total (
 );
 ```
 
-## Descripción
+#### Descripción
 
 Este módulo controla un display de siete segmentos de cuatro dígitos mediante multiplexado. Como las líneas de segmentos son compartidas, el sistema enciende un dígito a la vez a alta velocidad, dando la apariencia visual de que todos están encendidos simultáneamente.
 
-## Entradas
+#### Entradas
 
 | Señal       | Descripción                         |
 | ----------- | ----------------------------------- |
@@ -468,14 +488,14 @@ Este módulo controla un display de siete segmentos de cuatro dígitos mediante 
 | `val3[3:0]` | Valor del display centro-izquierda. |
 | `val4[3:0]` | Valor del display izquierdo.        |
 
-## Salidas
+#### Salidas
 
 | Señal            | Descripción                              |
 | ---------------- | ---------------------------------------- |
 | `anodos[3:0]`    | Selección del dígito activo.             |
 | `siete_seg[6:0]` | Señales hacia los segmentos del display. |
 
-## Funcionamiento
+#### Funcionamiento
 
 El módulo usa un divisor de reloj para cambiar de dígito aproximadamente cada 27000 ciclos de reloj:
 
@@ -519,7 +539,7 @@ Seleccionando cual segmento encender a traves de las descripciones binarias de c
 
 ---
 
-# 7. Flujo completo del sistema
+### 7. Flujo completo del sistema
 
 El funcionamiento completo puede resumirse así:
 
@@ -561,12 +581,12 @@ Como el display tiene cuatro dígitos, el resultado puede mostrarse desde `0000`
 
 ---
 
-## 11. Ejercicios
+## 4. Ejercicios
 
 En este apartado, se realizarán dos ejercicios sobre dos circuitos, el primero es sobre contadores sincrónicos y el segundo es un cerrojo Set-Reset con compuertas NAND.
 
 
-## Contadores sincrónicos
+### Contadores sincrónicos
  El 74LS163 es un contador cargable sincrónico de 4 bits, con un reset sincrónico. Entonces se toma la siguiente imagen para armar el circuito:
 
 
@@ -579,7 +599,7 @@ Fig 1. Contadores sincrónicos en cascada.
 
 Lo primero que se hará es una simulación en multisim para verificar cual es la respueta que se está buscando y cual es el comportamiento de las ondas, para luego compararlo con la respuesta final obtenida en el osciloscopio.
 
-### Simulación
+#### Simulación
 
 En la siguiente imagen, se muestra como se implemento el circuito en multisim: 
 
@@ -594,7 +614,7 @@ En est caso se usa unos modelos de 74LS163 que no son necesarios conectarlos una
 (en práctica si debe tomar en cuenta). El primer canal D0, tomará la señal del reloj, el segundo canal D1 sería la salida de QD del primer 74LS163, el tercer canal D2 sería la salida del QD del segundo 74LS163 y el cuarto canal D3 sería RCO del primer 74LS163. En la siguiente imagen se obtiene el resultado obtenido de la simulación:
 
 <p align="center">
-<img width="931" height="526" alt="image" src="https://github.com/user-attachments/assets/083e10dd-319d-40e9-8aa9-e44291e32020" />
+<img width="800" height="503" alt="image" src="https://github.com/user-attachments/assets/083e10dd-319d-40e9-8aa9-e44291e32020" />
 </p>
 <p align="center">
 Fig 3. Resultado del circuito de contadores sincrónicos en cascada en multisim.
@@ -602,12 +622,12 @@ Fig 3. Resultado del circuito de contadores sincrónicos en cascada en multisim.
 
 Luego se explicará porque estos comportamientos son coherentes y es lo que se está buscando.
 
-### Resultado obtenido en el Osciloscopio.
+#### Resultado obtenido en el Osciloscopio.
 
 En la siguiente imagen se muestra lo que se obtuvo oscilospocio, donde los canales son los mismos que utilizaron en la simulación:
 
 <p align="center">
-<img width="1448" height="913" alt="image" src="https://github.com/user-attachments/assets/5ada5999-1b5d-480b-8175-de7032c9a687" />
+<img width="800" height="503" alt="image" src="https://github.com/user-attachments/assets/5ada5999-1b5d-480b-8175-de7032c9a687" />
 </p>
 <p align="center">
 Fig 4. Resultado obtenido del osciloscopio del circuito de contadores sincrónicos en cascada.
@@ -643,8 +663,33 @@ Para saber que uno de los flip-flops cambie, luego de un flanco positivo del rel
 
 Por ultimo, se debe tomar la importacia de cuál bit de salida se escoja para el osciloscopio, porque cada una posee una frecuencia distinta, en la hoja de datos dice que QD es la frecuencia más baja [1]. Por eso en este caso si utliza QD para facilitar la observación temporal de la señales.
 
+#### Error en RCO del contador menos significativo
 
-## Cerrojo Set-Reset con compuertas NAND 
+Se muestra el error que se encuentra en la salida del RCO tanto con el analizador lógico y de manera analógica:
+
+<p align="center">
+<img width="800" height="503" alt="6_1el21" src="https://github.com/user-attachments/assets/01dddfb1-f546-447c-b259-1a5d64c909a3" />
+</p>
+<p align="center">
+Fig 5. Error en RCO del contador menos significativo en el analizador lógico.
+</p>
+
+Como era de esperarse, no se observa los picos o deformaciones del RCO (D3) debido que EN el analizador lógico solo interpreta niveles digitales y no puede capturar pulsos extremadamente cortos.
+
+<p align="center">
+<img width="800" height="503" alt="6_1ea1" src="https://github.com/user-attachments/assets/2a0b9b50-18bc-4ef3-ae31-01769b0a8010" />
+</p>
+<p align="center">
+Fig 6. Error en RCO del contador menos significativo de manera analógica.
+</p>
+
+De manera analógica, se pueden obsevar los glitches de la salida RCO, esto se debe a los retardos de propagación internos del circuito, pero se no logró identificar un glitch definido. El 74LS163 es un contador síncrono, pero sus flip-flops y compuertas lógicas no ocurren al mismo tiempo, porque cada elemento interno tiene un tiempo de propagación finito, por tanto en unos nano segundos aparezcan estados transitorios por momentos [1]. La salida RCO depende de varios bits del contador interno y las señales de habilitación de T y P. A la hora del cambio de bits a $1111_2$ a $0000_2$, generan combinaciones temporales incorrectas debido a las diferencias en los tiempos de propagación [1].
+
+#### Video de prueba del uso de la FPGA:
+
+https://youtu.be/u1_UUCeDtsI
+
+### Cerrojo Set-Reset con compuertas NAND 
 
 Este circuito corresponde un cerrojo SR sincronizado mendiante una señal de reloj y constituido con compuestas NAND. Este tipo de circuitos secuenciales tiene la capacidad de almacenar un bit de información utilizando realimentación entre las compuertas lógicas [4]. Se divide en dos etapas: 1. Habilitación mediante reloj. 2. Etapa de memoria.
 
@@ -663,11 +708,11 @@ En el caso que reloj este en bajo las salidas tomarán un valor alto, entonces e
 En la etapa de memoria también hay 2 compuertas NAND están conectadas en  realimentación cruzada:
 
 $$
-Q = \overline{X \cdot\overline{Q}}
+Q = (X \cdot Q)'
 $$
 
 $$
-\overline{Q}  = \overline{Y\cdot Q}
+\overline{Q}  = (Y \cdot Q)'
 $$
 
 Esta realimentación permite que el circuito conserve el último estado almacenado aun cuando las entradas regresen a cero [5]. 
@@ -680,18 +725,28 @@ Si está en el caso que $S = 0$ , $R = 1$ y $CLK = 1$, es el estado de RESET por
 
 Si está en el caso que $S = 1$ , $R = 1$ y $CLK = 1$, es el estado de inválido por lo que $Q = 1$ y $\overline{Q} = 1$. Se concidera inválido porque puede generar resultados impredecibles por los retardos internos de propagación [6]. 
 
+Su tabla de verdad es la siguiente:
+
+<p align="center">
+Tabla 1. Tabla de verdad del cerrojo.
+</p>
+
+<p align="center">
+<img width="753" height="157" alt="image" src="https://github.com/user-attachments/assets/aa5df3d7-967b-43c0-b6a4-416bea4fbaae" />
+</p>
+
 Se toma la siguiente imagen para armar el circuito:
 
 <p align="center">
 <img width="490" height="268" alt="image" src="https://github.com/user-attachments/assets/d6e73ada-4fc1-45a4-80a2-939b480fc2ad" />
 </p>
 <p align="center">
-Fig 5. Circuito de prueba de un cerrojo SR.
+Fig 7. Circuito de prueba de un cerrojo SR.
 </p>
 
 Se hará lo mismo que el ejericio anterior, una simulación en multisim para verificar cual es la respueta que se está buscando y cual es el comportamiento de las ondas, para luego compararlo con la respuesta final obtenida en el osciloscopio y también ver si cumple con la teoría antes establecida.
 
-### Simulación
+#### Simulación
 
 En la siguiente imagen, se mostrar como se implemento el circuito en multisim: 
 
@@ -699,7 +754,7 @@ En la siguiente imagen, se mostrar como se implemento el circuito en multisim:
 <img width="1293" height="527" alt="image" src="https://github.com/user-attachments/assets/721d9d95-3c3f-4e5c-adc3-526c2ede9291" />
 </p>
 <p align="center">
-Fig 6. Circuito de prueba de un cerrojo SR en multisim. 
+Fig 8. Circuito de prueba de un cerrojo SR en multisim. 
 </p>
 
 En este caso en el simulador se está utilizando un 74LS00D al no tener un 74CHOO en el simulador, sin embargo es una opción alternativa al tener las mismas funciones. También se utiliza un reloj en $1\mathrm{kHz}$ para más comodidad. El primer canal D0 tomará la señal del reloj, el segundo canal D1 tomará la señal de $S$, el tercer canal D2 será $R$, el cuarto canal D3 sera la salida de $Q$ y el quinto canal D4 será la salida de $\overline{Q}$. 
@@ -712,7 +767,7 @@ Caso $S = 1$ y $R = 0$:
 <img width="938" height="528" alt="image" src="https://github.com/user-attachments/assets/64b598ba-b902-4151-ae85-30a181ccbf7d" />
 </p>
 <p align="center">
-Fig 7. Resultado de la simulación del cerrojo de S = 1 y R = 0.
+Fig 9. Resultado de la simulación del cerrojo de S = 1 y R = 0.
 </p>
 
 
@@ -722,7 +777,7 @@ Caso $S = 0$ y $R = 0$:
 <img width="937" height="530" alt="image" src="https://github.com/user-attachments/assets/6e94f315-b868-4cce-af54-1def613924b7" />
 </p>
 <p align="center">
-Fig 8. Resultado de la simulación del cerrojo de S = 0 y R = 0.
+Fig 10. Resultado de la simulación del cerrojo de S = 0 y R = 0.
 </p>
 
 
@@ -732,7 +787,7 @@ Caso $S = 0$ y $R = 1$:
 <img width="935" height="528" alt="image" src="https://github.com/user-attachments/assets/a871bd51-ed33-42f0-a4a8-e81903101ca8" />
 </p>
 <p align="center">
-Fig 9. Resultado de la simulación del cerrojo de S = 0 y R = 1.
+Fig 11. Resultado de la simulación del cerrojo de S = 0 y R = 1.
 </p>
 
 
@@ -742,64 +797,80 @@ Caso $S = 1$ y $R = 1$:
 <img width="947" height="531" alt="image" src="https://github.com/user-attachments/assets/30a0a1a5-801e-49ef-b542-85d9d5174684" />
 </p>
 <p align="center">
-Fig 9. Resultado de la simulación del cerrojo de S = 1 y R = 1.
+Fig 12. Resultado de la simulación del cerrojo de S = 1 y R = 1.
 </p>
 
-### Resultado obtenido en el Osciloscopio.
+#### Resultado obtenido en el Osciloscopio.
 
 En la siguienteS imagenes se muestra lo que se obtuvo oscilospocio, donde los canales son los mismos que utilizaron en la simulación:
 
 Caso $S = 1$ y $R = 0$:
 
 <p align="center">
-<img width="1442" height="915" alt="image" src="https://github.com/user-attachments/assets/f9b02e79-d5f0-45ea-b805-1de91f54ecd6" />
+<img width="800" height="503" alt="image" src="https://github.com/user-attachments/assets/f9b02e79-d5f0-45ea-b805-1de91f54ecd6" />
 </p>
 <p align="center">
-Fig 10. Resultado del osciloscopio del cerrojo de S = 1 y R = 0.
+Fig 13. Resultado del osciloscopio del cerrojo de S = 1 y R = 0.
 </p>
 
 
 Caso $S = 0$ y $R = 0$:
 
 <p align="center">
-<img width="1447" height="912" alt="image" src="https://github.com/user-attachments/assets/93a89553-1d8f-4d23-afac-92a507a8b2ce" />
+<img width="800" height="503" alt="image" src="https://github.com/user-attachments/assets/93a89553-1d8f-4d23-afac-92a507a8b2ce" />
 </p>
 <p align="center">
-Fig 11. Resultado del osciloscopio del cerrojo de S = 0 y R = 0.
+Fig 14. Resultado del osciloscopio del cerrojo de S = 0 y R = 0.
 </p>
 
 Caso $S = 0$ y $R = 1$:
 
 <p align="center">
- <img width="1446" height="917" alt="image" src="https://github.com/user-attachments/assets/d4e85903-c24c-4963-87e4-bfb46fce46c2" />
+ <img width="800" height="503" alt="image" src="https://github.com/user-attachments/assets/d4e85903-c24c-4963-87e4-bfb46fce46c2" />
 </p>
 <p align="center">
-Fig 12. Resultado del osciloscopio del cerrojo de S = 0 y R = 1.
+Fig 15. Resultado del osciloscopio del cerrojo de S = 0 y R = 1.
 </p>
 
 Caso $S = 1$ y $R = 1$:
 
 <p align="center">
-<img width="1446" height="922" alt="image" src="https://github.com/user-attachments/assets/df4b9392-09ed-4a58-a97d-fb199a03dedd" />
+<img width="800" height="503" alt="image" src="https://github.com/user-attachments/assets/df4b9392-09ed-4a58-a97d-fb199a03dedd" />
 </p>
 <p align="center">
-Fig 9. Resultado del osciloscopio del cerrojo de S = 1 y R = 1.
+Fig 16. Resultado del osciloscopio del cerrojo de S = 1 y R = 1.
 </p>
 
 Como puede observar los resultados cumplen lo establecido anteriormente y también es similar a lo obtenido en la simulación.
 
-Su tabla de verdad es la siguiente:
+#### Circuito
 
 <p align="center">
-Tabla 1. Tabla de verdad del cerrojo.
+<img width="561" height="420" alt="image" src="https://github.com/user-attachments/assets/06d94db6-23d2-4dfa-b29a-add680fe2540" />
 </p>
-
 <p align="center">
-<img width="753" height="157" alt="image" src="https://github.com/user-attachments/assets/aa5df3d7-967b-43c0-b6a4-416bea4fbaae" />
+Fig 17. Diagrama del cricuito cerrojo SR.
 </p>
 
 
-## 12. Problemas encontrados durante el proyecto
+#### Utilidades del cerrojo
+
+Este circuito puede ser utilizado en:
+
+- Almacemanineto temporal de un bit de información.
+- Eliminación de rebotes pulsadores (debouncer).
+- Sincronización de señales digitales.
+- Construcción de flip-flops complejos.
+- Diseños de registros y memorias.
+
+
+#### Video de prueba del uso de la FPGA:
+
+https://youtu.be/HzC8ifVztvk
+
+
+
+## 5. Problemas encontrados durante el proyecto
 
 Uno de los problemas principales fue entender que el teclado no entrega directamente el valor de la tecla. El teclado solo conecta una fila con una columna, por lo que fue necesario implementar un scanner que active columnas y revise filas.
 
@@ -811,7 +882,7 @@ La captura de tres dígitos también necesitó cuidado. El número no se puede g
 
 En el módulo superior, el problema más común fue conectar señales equivocadas. Por ejemplo, usar la tecla cruda en lugar de la tecla validada puede hacer que el sistema detecte la tecla pero la almacene mal.
 
-## Consumo de recursos 
+## 6. Consumo de recursos 
 
 ### Estadísticas de síntesis del módulo `top`
 
