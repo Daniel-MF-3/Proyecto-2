@@ -39,11 +39,14 @@ El sistema completo se organiza en varios módulos: escaneo del teclado, elimina
 #### Modulo debounce
 ![Modulo debounce](image-1.png)
 
+#### Modulo FSM
+![alt text](image-6.png)
+
 #### Sumador
 ![Sumador](image-2.png)
 
 #### Modulo 7segmentos
-
+![alt text](image-5.png)
 
 ## Diagrama de transiciones de estados de la FSM de datos
 ![alt text](image-4.png)
